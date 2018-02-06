@@ -1,0 +1,26 @@
+#!/bin/sh
+case "$1" in
+    nav)
+setxkbmap -option numpad:microsoft
+echo "keycode 79 = Home KP_7
+keycode 87 = End KP_1
+keycode 81 = Prior KP_9
+keycode 89 = Next KP_3
+keycode 80 = Up KP_8
+keycode 83 = Left KP_4
+keycode 85 = Right KP_6
+keycode 88 = Down KP_2" | xmodmap -
+    ;;
+    num)
+echo "keycode 79 = KP_Home KP_7
+keycode 87 = KP_End KP_1
+keycode 81 = KP_Prior KP_9
+keycode 89 = KP_Next KP_3
+keycode 80 = KP_Up KP_8
+keycode 83 = KP_Left KP_4
+keycode 85 = KP_Right KP_6
+keycode 88 = KP_Down KP_2" | xmodmap -
+    ;;
+    *) echo "Usage: $0 <nav|num>"
+    ;;
+esac
