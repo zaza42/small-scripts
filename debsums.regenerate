@@ -1,0 +1,2 @@
+#!/bin/sh
+find . -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -print0 | xargs -0 md5sum > DEBIAN/md5sums
