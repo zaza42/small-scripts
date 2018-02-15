@@ -1,4 +1,4 @@
-#!/usr/bin/env lksh
+#!/bin/lksh
 # suspend dunst when window is fullscreen
 
 source ~/scripts/mytime.inc
@@ -13,6 +13,7 @@ typeset -i oldfull=0
 typeset -i oldlang=0
 typeset -x audonscreen
 typeset -l xsetparam=$(xset q|sed '/timeout/!d; s/^.*timeout:  \([0-9]*\).*cycle:  \([0-9]*\)$/s \1 \2s00/') #'
+typeset -l displayx=$(xrandr|grep -oP -m1 "   \K.*(?=x.*\*\+$)") #"
 
 function audplugins () {
     if ! [ "$1" = "$audonscreen" ]; then
@@ -35,6 +36,7 @@ stdbuf -oL xprop -spy -root _NET_ACTIVE_WINDOW _NET_CURRENT_DESKTOP | while read
 		class=${class#*, }
 		class=${class//[\" ]/}
 		palerun=0
+		projectmrun=0
 		case $class in
 #		    firefox|seamonkey|light|palemoon) killall -18 $class
 		    chromium|palemoon|basilisk|firefox)
@@ -64,6 +66,8 @@ stdbuf -oL xprop -spy -root _NET_ACTIVE_WINDOW _NET_CURRENT_DESKTOP | while read
 		    vncviewer|hexchat ) lang="1"
 		    ;;
 		    projectm* ) xseticon -id "$id" /home/DC-1/.local/share/icons/prjm16-transparent.png
+				killall -CONT projectM-pulseaudio
+			        projectmrun=1
 		    ;;
 		    *) lang="2"
 		    ;;
@@ -78,6 +82,12 @@ stdbuf -oL xprop -spy -root _NET_ACTIVE_WINDOW _NET_CURRENT_DESKTOP | while read
 			*) isfull=0 ;;
 		esac
 #		echo FS: $FS isfull=$isfull oldfull=$oldfull
+		read x y <<<$(xdotool getwindowgeometry $id|grep -oP "Position: \K[0-9]*")
+		if [ $x -ge $displayx ]; then
+		    echo -n "\n"$(mytime "2nd_head")
+		    icesh -window $id setState AllWorkspaces 1
+		    icesh -window $id setTrayOption 2
+		fi
 	    else
 		curdesk=$id
 #		if [ "$curdesk" = "$auddesk" ]; then audplugins on;fi
@@ -95,6 +105,7 @@ stdbuf -oL xprop -spy -root _NET_ACTIVE_WINDOW _NET_CURRENT_DESKTOP | while read
 #				    killall -STOP audacious
 #				fi
 				killall -STOP xautolock 2>/dev/null
+				((projectmrun)) || killall -STOP projectM-pulseaudio 2>/dev/null
 #				((palerun)) || killall -STOP palemoon-bin palemoon plugin-container basilisk-bin basilisk firefox firefox-bin 2>/dev/null
 				xset s off -dpms
 				xset s noblank
@@ -102,7 +113,7 @@ stdbuf -oL xprop -spy -root _NET_ACTIVE_WINDOW _NET_CURRENT_DESKTOP | while read
 		;;
 		*)	dunstify DUNST_COMMAND_RESUME
 #			killall -18 xautolock xpenguins xsnow gkrellm audacious xtigervncviewer 2>/dev/null
-			killall -18 xautolock 2>/dev/null
+			killall -18 xautolock projectM-pulseaudio 2>/dev/null
 			xset $xsetparam
 			xset s blank
 #			if [ "$curdesk" = "$auddesk" ]; then audplugins on;fi
