@@ -44,7 +44,6 @@ function browserlangcheck () {
                             	    ;;
 				esac
 				langset
-				oldname=$a
 			fi
 	    esac
 }
@@ -94,7 +93,7 @@ function fulle() {
     id=$1
     xprop -spy -id $id _NET_WM_STATE _NET_WM_NAME 2>/dev/null|
 #    oldfull=0
-    while read a; do
+    (while read a; do
 #    echo fline "$a" >&2
         case "$a" in
 	*_NET_WM_STATE_FOCUSED*) true
@@ -111,13 +110,13 @@ function fulle() {
 		    browserlangcheck
 		esac
 	;;
-	*)  isfull=0
+	*) isfull=0
 	    pkill -f -13 "xprop -spy -id $id _NET_WM_STATE"
 #		    exit
 	;;
         esac
 	fulldo
-    done
+    done; isfull=0;fulldo;)
 }
 
 echo "xprop started"
