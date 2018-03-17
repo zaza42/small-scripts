@@ -33,12 +33,12 @@ function xxkbrestart () {
 function browserlangcheck () {
 	    case $class in
 		    chromium|palemoon|basilisk|firefox)
-			wmname=${a##*::: }
+			wmname=${1##*::: }
 			if [ "${wmname:0:4}" = "http" ]; then
                                 case $wmname in
                             	    *stackexchange*|*codegold*|*stackoverflow*\
 				    |*superuser*|*serverfault*|*github*\
-				    |*debian.org* ) lang="0"
+				    |*debian.*|*pouet* ) lang="0"
                             	    ;;
                             	    *) lang="1"
                             	    ;;
@@ -50,9 +50,9 @@ function browserlangcheck () {
 function langset () {
 	    if [ $lang -ne 2 ] && [ $(xkblayout-state print "%c ") -ne $lang ]; then
                 case $lang in
-                    0) xkblayout-state set $lang 2>/dev/null; echo -n "\n"$(mytime "lang: us") >&2
+                    0) xkblayout-state set $lang 2>/dev/null; echo -n "\n"$(mytime "lang: us")
 		    ;;
-                    1) xkblayout-state set $lang 2>/dev/null; echo -n "\n"$(mytime "lang: hu") >&2
+                    1) xkblayout-state set $lang 2>/dev/null; echo -n "\n"$(mytime "lang: hu")
 		    ;;
                 esac
 		oldlang=$lang
@@ -61,7 +61,7 @@ function langset () {
 function fulldo () {
 	if [ -n "$isfull" ] && [ $isfull -ne $oldfull ] ; then
 	      echo -n "\n"$(mytime isfull: $isfull)
-	      echo -n "\n"$(mytime isfull: $isfull) >&2
+#	      echo -n "\n"$(mytime isfull: $isfull) >&2
 	      oldfull=$isfull
 	      case $isfull in
 		1)
@@ -71,7 +71,7 @@ function fulldo () {
 #				else
 #				    killall -STOP audacious
 #				fi
-				killall -STOP xautolock 2>/dev/null
+				killall -STOP xautolock glava 2>/dev/null
 				((projectmrun)) || killall -STOP projectM-pulseaudio 2>/dev/null
 #				((palerun)) || killall -STOP palemoon-bin palemoon plugin-container basilisk-bin basilisk firefox firefox-bin 2>/dev/null
 				xset s off -dpms
@@ -79,8 +79,12 @@ function fulldo () {
 				icesh -window $id setLayer 4
 		;;
 		*)	dunstify DUNST_COMMAND_RESUME
+			pidof buckle >/dev/null && bucklerun=true || bucklerun=false
+			$bucklerun && keysound.sh off
+			xte 'keydown Control_L' 'key space' 'keyup Control_L'
+			$bucklerun && keysound.sh on
 #			killall -18 xautolock xpenguins xsnow gkrellm audacious xtigervncviewer 2>/dev/null
-			killall -18 xautolock projectM-pulseaudio 2>/dev/null
+			killall -18 xautolock projectM-pulseaudio glava 2>/dev/null
 			xset $xsetparam
 			xset s blank
 #			if [ "$curdesk" = "$auddesk" ]; then audplugins on;fi
@@ -91,12 +95,14 @@ function fulldo () {
 
 function fulle() {
     id=$1
+    local focused
     xprop -spy -id $id _NET_WM_STATE _NET_WM_NAME 2>/dev/null|
 #    oldfull=0
     (while read a; do
 #    echo fline "$a" >&2
         case "$a" in
 	*_NET_WM_STATE_FOCUSED*) true
+	    focused=1
 	    case "$a" in
 		*_NET_WM_STATE_FULLSCREEN*) isfull=1
 		;;
@@ -105,12 +111,13 @@ function fulle() {
 	    esac
 	;;
 	*_NET_WM_NAME*)
-		case $(xprop -id $id _NET_WM_STATE) in
-		*_NET_WM_STATE_FOCUSED*)
-		    browserlangcheck
-		esac
+#		case $(xprop -id $id _NET_WM_STATE) in
+#		*_NET_WM_STATE_FOCUSED*)
+		[ "$focused" = "1" ] && browserlangcheck "$a"
+#		esac
 	;;
 	*) isfull=0
+	   focused=0
 	    pkill -f -13 "xprop -spy -id $id _NET_WM_STATE"
 #		    exit
 	;;
@@ -139,16 +146,6 @@ stdbuf -oL xprop -spy -root _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING 2>/dev/
 #			    killall -18 palemoon-bin palemoon plugin-container basilisk-bin basilisk firefox-bin firefox chromium 2>/dev/null
 			    palerun=1
 #			    audplugins off
-#			    wname=$(xprop -id $id _NET_WM_NAME 2>/dev/null)
-#			    browserlangcheck
-#                                case $wname in
-#                            	    *stackexchange*|*codegold*|*stackoverflow*\
-#				    |*superuser*|*serverfault*|*github*|*Issue*\
-#				    |*Debian\ Bug* ) lang="0"
-#                            	    ;;
-#                            	    *) lang="1"
-#                            	    ;;
-#				esac
 		    ;;
 #		    audacious) 
 #			       if [ "$audonscreen" = "off" ]; then
@@ -198,9 +195,10 @@ stdbuf -oL xprop -spy -root _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING 2>/dev/
 #	    echo xkblang: $(xkblayout-state print "%c ") lang: $lang
 #echo -n "\n langsetelott"
 	    langset
-	    str=$(fulle $id)
-	    i=$((${#str}-1))
-	    oldfull=${str:$i:1}
+	    fulle $id
+#	    str=$(fulle $id)
+#	    i=$((${#str}-1))
+#	    oldfull=${str:$i:1}
 
             lastline=$line
             lastclass=$class
