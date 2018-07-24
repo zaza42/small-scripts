@@ -1,7 +1,7 @@
 #!/bin/lksh
 
 #delay=3
-weatherfile=/home/DC-1/.wmWeatherReports/LHBP.TXT
+weatherfile=$HOME/.wmWeatherReports/LHBP.TXT
 #weatherfile=/tmp/test.txt
 while :; do
     unset icon
