@@ -1,5 +1,5 @@
 #!/bin/lksh
-#sum package sizes on which are on /
+#sum package sizes which are on /
 
 for file in /var/lib/dpkg/info/*.list; do
     echo -n . 1>&2
