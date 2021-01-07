@@ -1,5 +1,9 @@
 #!/bin/lksh
-#minimize/restore hexchat to/from systray with icewm keycombo:
+#minimize/restore hexchat to/from systray with icewm keycombo
+#
+# by DC-1
+# 2021.01.07.
+#
 #~/.icewm/keys
 #key "Alt+d" hexchatkey.sh
 #
@@ -9,8 +13,6 @@
 # optional:
 # Implement /proc/pid/kill to procfs, a.k.a. killpatch:
 #      http://lkml.iu.edu/hypermail/linux/kernel/1810.3/03701.html#
-# by DC-1
-# 2021.01.07.
 #################################################################
 
 xpidfile=/dev/shm/hexchatkey-xinput.pid
